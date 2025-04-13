@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class BidRequest {
 
+    private Long id;
     private Double amount;
     private String bidderId;
 }

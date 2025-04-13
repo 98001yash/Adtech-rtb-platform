@@ -20,7 +20,7 @@ public class BidService {
     private final ModelMapper modelMapper;
 
     // create a  bid
-    public Bid createBud(BidRequest bidRequest){
+    public Bid createBid(BidRequest bidRequest){
         Bid bid = modelMapper.map(bidRequest, Bid.class);
         return bidRepository.save(bid);
     }
