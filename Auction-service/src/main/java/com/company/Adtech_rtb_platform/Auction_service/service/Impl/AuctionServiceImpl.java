@@ -6,6 +6,7 @@ import com.company.Adtech_rtb_platform.Auction_service.entities.Auction;
 import com.company.Adtech_rtb_platform.Auction_service.enums.AuctionStatus;
 import com.company.Adtech_rtb_platform.Auction_service.exceptions.ResourceNotFoundException;
 import com.company.Adtech_rtb_platform.Auction_service.repository.AuctionRepository;
+import com.company.Adtech_rtb_platform.Auction_service.service.AuctionEventProducer;
 import com.company.Adtech_rtb_platform.Auction_service.service.AuctionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,16 +23,22 @@ public class AuctionServiceImpl implements AuctionService {
 
     private final AuctionRepository auctionRepository;
     private final ModelMapper modelMapper;
+    private final AuctionEventProducer auctionEventProducer;
 
 
     @Override
-    public AuctionResponseDto createAuction(AuctionRequestDto request) {
-       Auction auction = modelMapper.map(request, Auction.class);
-       auction.setStatus(AuctionStatus.CREATED);
-       Auction saved = auctionRepository.save(auction);
-       log.info("Auction created with ID: {}",saved.getId());
-       return modelMapper.map(saved, AuctionResponseDto.class);
+    public AuctionResponseDto createAuction(AuctionRequestDto requestDto) {
+        Auction auction = modelMapper.map(requestDto, Auction.class);
+        auction.setStatus(AuctionStatus.CREATED);
+        Auction savedAuction = auctionRepository.save(auction);
+
+        AuctionResponseDto responseDto = modelMapper.map(savedAuction, AuctionResponseDto.class);
+
+        auctionEventProducer.sendAuctionCreatedEvent(responseDto); // 👈 new line
+
+        return responseDto;
     }
+
 
     @Override
     public List<AuctionResponseDto> getAllAuctions() {
