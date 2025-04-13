@@ -26,6 +26,12 @@ spring:
             - Path=/bids/**
 
 
+        - id: Auction-service
+          uri: http://localhost:9020
+          predicates:
+            - Path=/auction/**
+
+
 
 
 
