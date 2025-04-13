@@ -4,5 +4,6 @@ public enum AuctionStatus {
 
     CREATED,
     ACTIVE,
-    ENDED
+    ENDED,
+    WINNER_DECLARED
 }

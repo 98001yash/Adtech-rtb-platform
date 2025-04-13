@@ -47,4 +47,15 @@ public class AuctionServiceImpl implements AuctionService {
                 .orElseThrow(()->new ResourceNotFoundException("Auction  not found with id: "+id));
         return modelMapper.map(auction, AuctionResponseDto.class);
     }
+
+    @Override
+    public AuctionResponseDto updateStatus(Long auctionId, AuctionStatus newStatus) {
+       Auction auction = auctionRepository.findById(auctionId)
+               .orElseThrow(() -> new ResourceNotFoundException("Auction id"+auctionId));
+
+       log.info("Updating auction status: id={}, currentStatus={}, newStatus={}",auctionId,auction.getStatus(),newStatus);
+       auction.setStatus(newStatus);
+       auction = auctionRepository.save(auction);
+       return modelMapper.map(auction, AuctionResponseDto.class);
+    }
 }

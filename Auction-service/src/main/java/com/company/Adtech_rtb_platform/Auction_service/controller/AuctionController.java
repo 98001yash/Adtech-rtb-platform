@@ -1,8 +1,10 @@
 package com.company.Adtech_rtb_platform.Auction_service.controller;
 
 
+import com.company.Adtech_rtb_platform.Auction_service.advices.ApiResponse;
 import com.company.Adtech_rtb_platform.Auction_service.dtos.AuctionRequestDto;
 import com.company.Adtech_rtb_platform.Auction_service.dtos.AuctionResponseDto;
+import com.company.Adtech_rtb_platform.Auction_service.enums.AuctionStatus;
 import com.company.Adtech_rtb_platform.Auction_service.service.AuctionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,4 +38,23 @@ public class AuctionController {
         log.info("Fetching auction with id: {}",id);
         return ResponseEntity.ok(auctionService.getAuctionById(id));
     }
+
+    @PutMapping("/{auctionId}/status")
+    public ResponseEntity<ApiResponse<AuctionResponseDto>> updateAuctionStatus(
+            @PathVariable Long auctionId,
+            @RequestParam AuctionStatus status) {
+
+        log.info("Received request to update status of auction {} to {}", auctionId, status);
+        AuctionResponseDto updatedAuction = auctionService.updateStatus(auctionId, status);
+
+        return ResponseEntity.ok(
+                ApiResponse.<AuctionResponseDto>builder()
+                        .timeStamp(java.time.LocalDateTime.now())
+                        .data(updatedAuction)
+                        .error(null)
+                        .build()
+        );
+    }
+
+
 }
