@@ -16,6 +16,7 @@ public class AuctionRequestDto {
 
     private String itemName;
     private String itemDescription;
+    private Double startingPrice;
     private Double startingTime;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
