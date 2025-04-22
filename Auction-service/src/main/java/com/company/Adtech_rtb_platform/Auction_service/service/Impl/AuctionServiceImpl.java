@@ -2,6 +2,7 @@ package com.company.Adtech_rtb_platform.Auction_service.service.Impl;
 
 import com.company.Adtech_rtb_platform.Auction_service.dtos.AuctionRequestDto;
 import com.company.Adtech_rtb_platform.Auction_service.dtos.AuctionResponseDto;
+import com.company.Adtech_rtb_platform.Auction_service.dtos.BidResponseDto;
 import com.company.Adtech_rtb_platform.Auction_service.entities.Auction;
 import com.company.Adtech_rtb_platform.Auction_service.enums.AuctionStatus;
 import com.company.Adtech_rtb_platform.Auction_service.exceptions.ResourceNotFoundException;
@@ -14,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,5 +64,27 @@ public class AuctionServiceImpl implements AuctionService {
        auction.setStatus(newStatus);
        auction = auctionRepository.save(auction);
        return modelMapper.map(auction, AuctionResponseDto.class);
+    }
+
+    @Override
+    public void handleBidResponse(BidResponseDto bidResponseDto) {
+      log.info("Handling bid Response: {}",bidResponseDto);
+
+        Optional<Auction> optionalAuction = auctionRepository.findById(bidResponseDto.getAuctionId());
+        if(optionalAuction.isEmpty()){
+            log.warn("Auction not found for ID: {}",bidResponseDto.getAuctionId());
+            return;
+        }
+        Auction auction= optionalAuction.get();
+        if(auction.getStatus()==AuctionStatus.WINNER_DECLARED){
+            log.warn("Winner already declared for auction Id: {}",auction.getId());
+            return;
+        }
+
+        auction.setStatus(AuctionStatus.WINNER_DECLARED);
+        auctionRepository.save(auction);
+
+        AuctionResponseDto updatedAuction = modelMapper.map(auction,AuctionResponseDto.class);
+        log.info("Winner declared: {}",updatedAuction);
     }
 }

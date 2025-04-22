@@ -2,6 +2,7 @@ package com.company.Adtech_rtb_platform.Auction_service.service;
 
 import com.company.Adtech_rtb_platform.Auction_service.dtos.AuctionRequestDto;
 import com.company.Adtech_rtb_platform.Auction_service.dtos.AuctionResponseDto;
+import com.company.Adtech_rtb_platform.Auction_service.dtos.BidResponseDto;
 import com.company.Adtech_rtb_platform.Auction_service.enums.AuctionStatus;
 
 import java.util.List;
@@ -12,4 +13,6 @@ public interface AuctionService {
     List<AuctionResponseDto> getAllAuctions();
     AuctionResponseDto getAuctionById(Long id);
     AuctionResponseDto updateStatus(Long auctionId, AuctionStatus newStatus);
+
+    void handleBidResponse(BidResponseDto bidResponseDto);
 }
