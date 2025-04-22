@@ -18,4 +18,5 @@ public class BidResponseDto {
     private Long userId;
     private BigDecimal amount;
     private String timeStamp;
+
 }

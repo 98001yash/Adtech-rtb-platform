@@ -33,9 +33,7 @@ public class AuctionServiceImpl implements AuctionService {
         Auction savedAuction = auctionRepository.save(auction);
 
         AuctionResponseDto responseDto = modelMapper.map(savedAuction, AuctionResponseDto.class);
-
-        auctionEventProducer.sendAuctionCreatedEvent(responseDto); // 👈 new line
-
+        auctionEventProducer.sendAuctionCreatedEvent(responseDto); // produce the event for the auction so that bid-handler can consume it
         return responseDto;
     }
 
