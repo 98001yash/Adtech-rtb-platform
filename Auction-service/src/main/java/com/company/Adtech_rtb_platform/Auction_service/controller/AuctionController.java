@@ -1,6 +1,7 @@
 package com.company.Adtech_rtb_platform.Auction_service.controller;
 
 
+import com.company.Adtech_rtb_platform.Auction_service.advices.ApiError;
 import com.company.Adtech_rtb_platform.Auction_service.advices.ApiResponse;
 import com.company.Adtech_rtb_platform.Auction_service.dtos.AuctionRequestDto;
 import com.company.Adtech_rtb_platform.Auction_service.dtos.AuctionResponseDto;
@@ -9,9 +10,11 @@ import com.company.Adtech_rtb_platform.Auction_service.enums.AuctionStatus;
 import com.company.Adtech_rtb_platform.Auction_service.service.AuctionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -58,10 +61,25 @@ public class AuctionController {
     }
 
     @PostMapping("/bid-response")
-    public ResponseEntity<String> receiveBidResponse(@RequestBody BidResponseDto bidResponseDto){
-        auctionService.handleBidResponse(bidResponseDto);
-        return ResponseEntity.ok("Bid received");
+    public ResponseEntity<ApiResponse<String>> handleBidResponse(@RequestBody BidResponseDto bidResponseDto) {
+        try {
+            auctionService.handleBidResponse(bidResponseDto);
+
+            ApiResponse<String> response = new ApiResponse<>("Bid response handled successfully.");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            // Create an ApiError with appropriate status and message
+            ApiError apiError = ApiError.builder()
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .message("Failed to handle bid response: " + e.getMessage())
+                    .subErrors(Collections.singletonList(e.getClass().getSimpleName())) // Adding the exception class name as sub-error (can be extended)
+                    .build();
+            ApiResponse<String> response = new ApiResponse<>(apiError);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
+
+
 
 
 }
