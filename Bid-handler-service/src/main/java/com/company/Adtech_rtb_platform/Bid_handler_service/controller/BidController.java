@@ -44,15 +44,13 @@ public class BidController {
         }
     }
 
-    @PostMapping("/submit")
-    public ResponseEntity<String> submitBid(@RequestBody BidRequest request){
-        BidEvent event = new BidEvent();
-        event.setId(request.getId());
-        event.setAmount(request.getAmount());
-        event.setBidderId(request.getBidderId());
-        event.setBidTime(LocalDateTime.now());
-
-        bidEventProducer.sendBidEvent(event);
-        return ResponseEntity.ok("Bid submitted successfully.");
+    @PostMapping
+    public ResponseEntity<String> submitBid(@RequestBody BidRequest bidRequest) {
+        try {
+            bidService.submitBid(bidRequest);
+            return ResponseEntity.ok("Bid submitted successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error submitting bid: " + e.getMessage());
+        }
     }
 }
