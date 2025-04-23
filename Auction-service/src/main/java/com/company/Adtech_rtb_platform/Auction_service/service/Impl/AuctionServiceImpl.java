@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -68,23 +69,40 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Override
     public void handleBidResponse(BidResponseDto bidResponseDto) {
-      log.info("Handling bid Response: {}",bidResponseDto);
+        log.info("Handling bid response: {}", bidResponseDto);
 
         Optional<Auction> optionalAuction = auctionRepository.findById(bidResponseDto.getAuctionId());
-        if(optionalAuction.isEmpty()){
-            log.warn("Auction not found for ID: {}",bidResponseDto.getAuctionId());
-            return;
-        }
-        Auction auction= optionalAuction.get();
-        if(auction.getStatus()==AuctionStatus.WINNER_DECLARED){
-            log.warn("Winner already declared for auction Id: {}",auction.getId());
+        if (optionalAuction.isEmpty()) {
+            log.warn("Auction not found for ID: {}", bidResponseDto.getAuctionId());
             return;
         }
 
-        auction.setStatus(AuctionStatus.WINNER_DECLARED);
+        Auction auction = optionalAuction.get();
+
+        if (auction.getStatus() == AuctionStatus.WINNER_DECLARED) {
+            log.warn("Winner already declared for auction ID: {}", auction.getId());
+            return;
+        }
+
+        // Check if this bid is the highest
+        if (auction.getHighestBidAmount() == null ||
+                bidResponseDto.getAmount().compareTo(auction.getHighestBidAmount()) > 0) {
+
+            auction.setHighestBidAmount(bidResponseDto.getAmount());
+            auction.setHighestBidderId(bidResponseDto.getUserId());
+            log.info("New highest bid set: {} by User ID {}", bidResponseDto.getAmount(), bidResponseDto.getUserId());
+        }
+
+        // If auction has ended, declare winner
+        if (auction.getEndTime().isBefore(LocalDateTime.now())) {
+            auction.setStatus(AuctionStatus.WINNER_DECLARED);
+            log.info("Auction ended. Winner declared: User ID {}", auction.getHighestBidderId());
+        }
+
         auctionRepository.save(auction);
 
-        AuctionResponseDto updatedAuction = modelMapper.map(auction,AuctionResponseDto.class);
-        log.info("Winner declared: {}",updatedAuction);
+        AuctionResponseDto updatedAuction = modelMapper.map(auction, AuctionResponseDto.class);
+        log.info("Updated auction after handling bid: {}", updatedAuction);
     }
+
 }
