@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 
@@ -31,4 +32,8 @@ public class Auction {
 
     @Enumerated(EnumType.STRING)
     private AuctionStatus status;
+
+
+    private BigDecimal highestBidAmount;
+    private Long highestBidderId;
 }
